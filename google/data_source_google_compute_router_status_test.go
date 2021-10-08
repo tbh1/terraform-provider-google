@@ -9,7 +9,7 @@ import (
 
 func TestAccDataSourceComputeRouterStatus(t *testing.T) {
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-router-%d", randInt(t))
+	name := fmt.Sprintf("tf-test-router-status-%d", randInt(t))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -42,9 +42,8 @@ resource "google_compute_router" "foobar" {
   }
 }
 
-data "google_compute_router" "myrouter" {
+data "google_compute_router_status" "myrouter" {
   name    = google_compute_router.foobar.name
-  network = google_compute_network.foobar.name
 }
 `, name, name)
 }

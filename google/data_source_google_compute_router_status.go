@@ -90,11 +90,11 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting network: %s", err)
 	}
 
-	if err := mapRoutes(d, "best_routes", status.BestRoutes); err != nil {
+	if err := d.Set("best_routes", flattenRoutes(status.BestRoutes)); err != nil {
 		return fmt.Errorf("Error setting best_routes: %s", err)
 	}
 
-	if err := mapRoutes(d, "best_routes_for_router", status.BestRoutesForRouter); err != nil {
+	if err := d.Set("best_routes_for_router", flattenRoutes(status.BestRoutes)); err != nil {
 		return fmt.Errorf("Error setting best_routes_for_router: %s", err)
 	}
 
@@ -103,25 +103,24 @@ func dataSourceComputeRouterStatusRead(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func mapRoutes(d *schema.ResourceData, field string, routes []*compute.Route) error {
-	log.Printf("[DEBUG] mapping %d routes for %s", len(routes), field)
+func flattenRoutes(routes []*compute.Route) []map[string]interface{} {
 	results := make([]map[string]interface{}, len(routes))
 
 	for i, route := range routes {
-		output := make(map[string]interface{})
-		output["dest_range"] = route.DestRange
-		output["name"] = route.Name
-		output["network"] = route.Network
-		output["description"] = route.Description
-		output["next_hop_gateway"] = route.NextHopGateway
-		output["next_hop_ilb"] = route.NextHopIlb
-		output["next_hop_ip"] = route.NextHopIp
-		output["next_hop_vpn_tunnel"] = route.NextHopVpnTunnel
-		output["priority"] = route.Priority
-		output["tags"] = route.Tags
-		output["next_hop_network"] = route.NextHopNetwork
-		results[i] = output
+		results[i] = map[string]interface{
+			"dest_range": route.DestRange,
+			"name": route.Name,
+			"network": route.Network,
+			"description": route.Description,
+			"next_hop_gateway": route.NextHopGateway,
+			"next_hop_ilb": route.NextHopIlb,
+			"next_hop_ip": route.NextHopIp,
+			"next_hop_vpn_tunnel": route.NextHopVpnTunnel,
+			"priority": route.Priority,
+			"tags": route.Tags,
+			"next_hop_network": route.NextHopNetwork,
+		}
 	}
 
-	return d.Set(field, results)
+	return results
 }
